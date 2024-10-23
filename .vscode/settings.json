@@ -1,0 +1,13 @@
+{
+    "workbench.colorCustomizations": {
+        "titleBar.activeBackground": "#ff0000",   // Bright red for the title bar
+        "titleBar.activeForeground": "#ffffff",   // White text for visibility
+        "titleBar.inactiveBackground": "#ff6666", // Slightly lighter red for the inactive state
+        "titleBar.inactiveForeground": "#ffffffcc"  // Dimmed white for inactive state
+    },
+    "files.autoSave": "off",  // To prevent auto-saving anything in the "wrong" folder accidentally
+    "workbench.startupEditor": "newUntitledFile",  // Open a new file by default
+    "files.exclude": {
+        "**/*": true  // Hide all files to avoid confusion when opening this folder
+    }
+}

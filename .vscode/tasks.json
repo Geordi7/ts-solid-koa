@@ -1,0 +1,19 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "auto-open-file-on-startup",
+            "type": "shell",
+            "command": "code .vscode/warning.md",
+            "runOptions": {"runOn": "folderOpen"},
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": false,
+            }
+        }
+    ]
+}

@@ -1,0 +1,8 @@
+{
+    "workbench.colorCustomizations": {
+        "titleBar.activeBackground": "#b07c5c",   // Warm, muted brownish-orange tone
+        "titleBar.activeForeground": "#ffffff",   // Light text for visibility
+        "titleBar.inactiveBackground": "#b07c5ccc", // Slightly transparent for inactive state
+        "titleBar.inactiveForeground": "#d0d0d0cc"  // Dimmed light text for inactive state
+    }
+}
