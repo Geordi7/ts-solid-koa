@@ -10,5 +10,6 @@
     "types": ["vite/client"],
     "noEmit": true,
     "isolatedModules": true,
+    "noUncheckedIndexedAccess": true,                 /* Add 'undefined' to a type when accessed using an index. */
   },
 }
