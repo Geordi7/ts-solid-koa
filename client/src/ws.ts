@@ -5,7 +5,8 @@ import { AppEvent, AppPath, ClientMessage, vServerMessage } from './common';
 const ws = new WebSocket('/');
 const evt = createEventTree<AppEvent, void>();
 
-const wsSend = (m: ClientMessage) => ws.send(JSON.stringify(m));
+let initialSendQueue = [] as string[];
+let wsSend = (m: ClientMessage) => {initialSendQueue.push(JSON.stringify(m))};
 
 const subscriptions = {} as Record<string, Set<(e: AppEvent, src: AppPath) => void>>;
 
@@ -19,7 +20,16 @@ ws.addEventListener('message', m => {
     }
 });
 
-ws.addEventListener('open', ev => console.log('WS CONNECTED', ev));
+ws.addEventListener('open', ev => {
+    console.log('WS CONNECTED', ev);
+    
+    for (const m of initialSendQueue) {
+        ws.send(m);
+    }
+
+    wsSend = (m: ClientMessage) => ws.send(JSON.stringify(m));
+});
+
 ws.addEventListener('close', ev => console.log('WS DISCONNECTED', ev));
 ws.addEventListener('error', ev => console.log('WS ERROR', ev));
 

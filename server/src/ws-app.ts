@@ -40,48 +40,65 @@ app.ws.use(async (ctx, next) => {
 
 let messageNumber = 0;
 const tagMsg = () => messageNumber++;
+const mark = Symbol();
+const marked = (event: unknown, connection: number) => {
+    const e = event as {[mark]?: Set<number>};
+    e[mark] = e[mark] ?? new Set();
+    if (e[mark].has(connection)) {
+        return true;
+    } else {
+        e[mark].add(connection);
+        return false;
+    }
+}
 
 app.ws.use(async (ctx) => {
-    const subscriptions = {} as Record<string, Record<number, Unsubscribe>>;
+    const subscriptions = {} as Record<string, Unsubscribe>;
 
     const send = (m: ServerMessage) => {
         const msgNum = tagMsg();
         ctx.log(ctx.state.wsConnection, 'SEND', msgNum, m);
         ctx.websocket.send(JSON.stringify(m), err => {
-            ctx.log(ctx.state.wsConnection, 'SEND-FAILED', msgNum, err);
+            if (err) ctx.log(ctx.state.wsConnection, 'SEND-FAILED', msgNum, err);
         });
     }
 
     ctx.websocket.on('message', m => {
         const msgNum = tagMsg();
+        const time = performance.now() - ctx.state.start;
         try {
-            const ms = JSON.parse(m.toString());
-            ctx.log(ctx.state.wsConnection, 'RECEIVE', msgNum, ms);
-            const msg = vClientMessage.parse(ms);
+            const msg = vClientMessage.parse(JSON.parse(m.toString()));
+            ctx.log(ctx.state.wsConnection, time, 'RECEIVE', msgNum, msg);
 
             match(msg, {
                 subscribe: s => {
                     const p = s.subscribe.join('\0');
-                    subscriptions[p] = subscriptions[p] ?? {};
-                    subscriptions[p][s.channel] = evt.subscribe(s.subscribe, event =>
-                        send({send: s.subscribe, event}));
+                    subscriptions[p] = evt.subscribe(s.subscribe, (event, to) =>
+                        marked(event, ctx.state.wsConnection!) ? null :
+                            send({send: to, event}));
                 },
                 unsubscribe: s => {
                     const p = s.unsubscribe.join('\0');
-                    if (!(p in subscriptions) || !(s.channel in subscriptions[p]!)) {
+                    if (!(p in subscriptions)) {
                         ctx.log('invalid subscription!');
                         return;
                     }
 
-                    subscriptions[p]![s.channel]!();
-                    delete subscriptions[p]![s.channel];
+                    subscriptions[p]!();
+                    delete subscriptions[p];
                 },
                 send: s => {
+                    marked(s.event, ctx.state.wsConnection!);
                     evt.send(s.send, s.event);
                 }
             });
         } catch (e) {
-            ctx.log(ctx.state.wsConnection, 'RECEIVE-FAILED', msgNum, e);
+            ctx.log(ctx.state.wsConnection, 'RECEIVE-FAILED', msgNum, e, m.toString());
         }
-    })
+    });
+
+    ctx.websocket.on('close', ev => {
+        console.log('WS-CLOSE', ctx.state.wsConnection, performance.now() - ctx.state.start, ev);
+        for (const unsub of rec.v(subscriptions)) unsub();
+    });
 });

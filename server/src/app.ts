@@ -18,7 +18,7 @@ type Context = {
     log: (...args: unknown[]) => void,
 };
 
-export const app = KoaWebsocket(new Koa<State, Context>());
+export const app = new Koa<State, Context>();
 
 app.use(async (ctx, next) => {
     ctx.log = console.log;

@@ -1,11 +1,11 @@
 
 import * as v from '@badrap/valita';
 
-export type AppPath = string[] & {readonly 'AppPath': unique symbol};
-export const vAppPath = v.array(v.string()) as unknown as v.Type<AppPath>;
+export type AppPath = string[];
+export const vAppPath = v.array(v.string());
 
 export type User = string[] & {readonly 'User': unique symbol};
-export const vUser = v.array(v.string()) as unknown as v.Type<User>;
+export const vUser = v.string() as unknown as v.Type<User>;
 
 export type ClientMessage = v.Infer<typeof vClientMessage>;
 export const vClientMessage = v.union(
